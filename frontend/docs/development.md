@@ -131,6 +131,25 @@ You can run mailhog service via docker image by:
 docker run -p 8025:8025 -p 1025:1025 mailhog/mailhog
 ```
 
+jeste chybi finalni podoba emailu.
+
+na testovani doporucuju
+docker run -p 8025:8025 -p 1025:1025 mailhog/mailhog
+otevrit v browseru localhost:8025
+
+a do .env
+
+EMAIL_SERVER_HOST="localhost"
+EMAIL_SERVER_PORT="1025"
+EMAIL_SERVER_SECURE="false"
+EMAIL_FROM="noreply@localhost"
+MAGIC_LINK_SECRET="secret"
+EMAIL_SERVER_USER="user"
+EMAIL_SERVER_PASS="password"
+prihlasovani se inicializuje GET /api/auth/magiclogin?destination=email@example.com
+
+
+
 #### C) Running Storybook for component development
 
 Use [Storybook](https://storybook.js.org) to work on the presentational components.
