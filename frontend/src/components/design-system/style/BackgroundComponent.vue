@@ -25,8 +25,17 @@ const currentEmbed = inject(EmbedKey);
 </script>
 
 <template>
-  <template v-if="currentEmbed">
-    <slot />
+  <template v-if="currentEmbed === 'infovolby'">
+    <!-- <slot /> -->
+    <div class="background new-gradient-background">
+      <template v-if="props.hasBlobs">
+        <!-- <div class="blobs">
+          <img src="@/assets/background/blue-blob.svg" class="blue-blob" />
+          <img src="@/assets/background/red-blob.svg" class="red-blob" />
+        </div> -->
+      </template>
+      <slot />
+    </div>
   </template>
   <template v-else>
     <div class="background">
@@ -42,6 +51,11 @@ const currentEmbed = inject(EmbedKey);
 </template>
 
 <style scoped lang="scss">
+.new-gradient-background{
+  background: rgb(255,118,108);
+  background: linear-gradient(149deg, rgba(255,118,108,1) 29%, rgba(248,11,37,1) 69%, rgba(237,89,149,1) 90%);
+}
+
 .background {
   display: grid;
   width: 100%;

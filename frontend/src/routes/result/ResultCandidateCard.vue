@@ -71,10 +71,10 @@ const toggleClick = () => {
       <AvatarComponent
         :size="order === 1 ? 'extra-large' : 'large'"
         :background-color="
-          order === 1
-            ? 'rgb(var(--palette-primary-50))'
-            : 'rgb(var(--palette-primary-90))'
-        "
+            order === 1
+              ? 'rgb(54 61 97)'
+              : 'rgb(115 146 200)'
+          "
         :background-image="
           candidate?.img_url ||
           (candidate?.parties?.length === 1
@@ -130,10 +130,18 @@ const toggleClick = () => {
       </BodyText>
     </div>
     <div class="progress-bar">
-      <SimpleProgress
+      <!-- <SimpleProgress
         :id="candidate?.id || ''"
         :color-primary="`rgb(var(${primaryColor}))`"
         color-secondary="rgb(var(--color-neutral-bg))"
+        height="0.375rem"
+        :value="result"
+        :max="100"
+      ></SimpleProgress> -->
+      <SimpleProgress
+        :id="candidate?.id || ''"
+        :color-primary="`rgb(54, 61, 97)`"
+        color-secondary="rgb(242, 192, 193)"
         height="0.375rem"
         :value="result"
         :max="100"
