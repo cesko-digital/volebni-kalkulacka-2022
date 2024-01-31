@@ -317,7 +317,7 @@ export interface Source {
                       answer.candidate_id === candidateId &&
                       answer.question_id === question.id,
                   )[0]?.sources as Source[]"
-                  v-bind:key="source.url"
+                  :key="source.url"
                 >
                   <li>
                     <a :href="source.url">{{
