@@ -1,4 +1,7 @@
+import { setup } from '@storybook/vue3';
 import type { StoryContext, StoryFn } from '@storybook/types';
+
+import { i18n } from '../src/i18n/index';
 
 import ThemeProvider from '@/components/utilities/theming/ThemeProvider.vue';
 
@@ -47,3 +50,7 @@ const withThemeProvider = (story: StoryFn, context: StoryContext) => ({
 });
 
 export const decorators = [withThemeProvider];
+
+setup((app) => {
+  app.use(i18n);
+});
