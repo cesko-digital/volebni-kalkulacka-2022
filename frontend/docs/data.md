@@ -34,6 +34,7 @@ Each calculator can also be (except ID) identified via human-friendly key. How t
 - for an election with neither districts nor rounds, `/{group}/{variant}`, for example `/prezidentske-2023/pro-mlade`
 - for an election with districts only, `/{group}/{district}` or `/{group}/{variant}/{district}`, for example `/komunalni-2022/praha`
 - for an election with rounds only, `/{group}/{round}` or `/{group}/{variant}/{round}`, for example `/prezidentske-2023/pro-mlade/2-kolo`
+- for an election with both districts and rounds, `/{group}/{district}/{round}` or `/{group}/{variant}/{district}/{round}`, for example `/senatni-2022/pro-mlade/praha-11/2-kolo`
 
 The keys have to be unique among the whole instance.
 
