@@ -42,3 +42,10 @@ model User {
   updatedAt      DateTime  @updatedAt @db.Timestamptz()
   Answers        Answers[]
 }
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt   DateTime
+}

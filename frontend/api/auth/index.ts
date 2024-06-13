@@ -3,11 +3,14 @@ import { sign } from 'jsonwebtoken';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as TwitterStrategy } from 'passport-twitter';
 import type { Profile } from 'passport';
 import { prisma } from '../../src/server/prisma';
 import { assignAnswerToUser } from '../../src/server/answers';
 import ms from 'ms';
 import { respond404 } from '../../src/server/errors';
+import session from 'express-session';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 
 const app: Express = express();
 
@@ -21,6 +24,20 @@ const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL || PUBLIC_URL;
 if (!PUBLIC_URL) {
   throw new Error('PUBLIC_URL is not defined');
 }
+
+if (!process.env['SESSION_SECRET']) {
+  throw new Error('SESSION_SECRET is not defined');
+}
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((id, done) => {
+  prisma.user.findUnique({ where: { id: id as string } }).then((user) => {
+    done(null, user);
+  });
+});
 
 const providers = {
   facebook: {
@@ -58,6 +75,25 @@ const providers = {
       process.env['OAUTH_GOOGLE_CLIENT_SECRET']
     ),
     scope: ['profile', 'email'],
+  },
+  twitter: {
+    strategy: () => {
+      return new TwitterStrategy(
+        {
+          consumerKey: process.env['TWITTER_CONSUMER_KEY'] as string,
+          consumerSecret: process.env['TWITTER_CONSUMER_SECRET'] as string,
+          callbackURL: `${OAUTH_CALLBACK_URL}/api/auth/twitter/callback`,
+          userProfileURL:
+            'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true',
+        },
+        getStrategyCallback('twitter')
+      );
+    },
+    enabled: !!(
+      process.env['TWITTER_CONSUMER_KEY'] &&
+      process.env['TWITTER_CLIENT_SECRET']
+    ),
+    scope: ['offline_access', 'profile'],
   },
 };
 
@@ -143,11 +179,11 @@ const redirectAfterCallback = (returnTo: string, res: Response) => {
 
 const callback = (provider: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate(provider, { session: false }, (err, user, info) => {
+    passport.authenticate(provider, { session: true }, (err, user, info) => {
       if (err || !user) {
         return res.redirect('/' + '?error=' + err?.message);
       }
-      req.login(user, { session: false }, async (err) => {
+      req.login(user, { session: true }, async (err) => {
         if (err) {
           console.error(err);
           return res.status(400).send({ err: err?.message || err });
@@ -219,6 +255,21 @@ const authenticate = (options: { provider: string; scope: string[] }) => {
     return authenticator(req, res, next);
   };
 };
+
+app.set('trust proxy', 1);
+app.use(
+  session({
+    secret: process.env['SESSION_SECRET'] as string,
+    store: new PrismaSessionStore(prisma, {
+      checkPeriod: 2 * 60 * 1000, //ms
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
+    }),
+    saveUninitialized: true,
+    resave: true,
+    cookie: { secure: process.env.VERCEL_ENV === 'production' },
+  })
+);
 
 for (const provider in providers) {
   if (providers[provider].enabled) {
