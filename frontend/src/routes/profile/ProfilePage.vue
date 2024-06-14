@@ -65,10 +65,7 @@ if (!userStore.user) router.push(appRoutes.login);
       </ResponsiveWrapper>
 
       <TimelineComponent style="margin-top: 2rem">
-        <TimelineItemComponent
-          v-for="(answer, idx) in answers"
-          v-bind:key="idx"
-        >
+        <TimelineItemComponent v-for="(answer, idx) in answers" :key="idx">
           <ElectionCardWrapperComponent :answer="answer" />
         </TimelineItemComponent>
 

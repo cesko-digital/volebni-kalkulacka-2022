@@ -151,7 +151,7 @@ const handleSubmit = async () => {
           </ResponsiveWrapper>
         </template>
 
-        <NavigationBar transparent :with-logo="false" v-if="step === 1">
+        <NavigationBar v-if="step === 1" transparent :with-logo="false">
           <template #right>
             <IconButton kind="link" @click="handleClose">
               <IconComponent
@@ -164,7 +164,7 @@ const handleSubmit = async () => {
       </template>
       <StaticContentLayout size="small">
         <StackComponent spacing="medium" centered>
-          <TitleText tag="p" size="medium" v-if="step === 0">
+          <TitleText v-if="step === 0" tag="p" size="medium">
             {{ texts[step][type].title }}
           </TitleText>
 
@@ -176,31 +176,31 @@ const handleSubmit = async () => {
             </TitleText>
           </template>
 
-          <BodyText strong size="medium" v-if="step === 0">
+          <BodyText v-if="step === 0" strong size="medium">
             {{ $t('routes.profile.EmailFormPageVue.notification') }}
           </BodyText>
 
-          <BodyText size="medium" centered v-if="step === 1">
+          <BodyText v-if="step === 1" size="medium" centered>
             {{ texts[step][type].info }}
             <BodyText strong size="medium"> {{ emailAddress }} </BodyText>
           </BodyText>
 
-          <BodyText tag="p" size="medium" centered v-if="step === 0">
+          <BodyText v-if="step === 0" tag="p" size="medium" centered>
             {{ texts[step][type].info }}
           </BodyText>
 
-          <BodyText tag="p" size="medium" centered v-if="step === 1">
+          <BodyText v-if="step === 1" tag="p" size="medium" centered>
             {{ $t('routes.profile.EmailFormPageVue.about-spam') }}
           </BodyText>
 
-          <FormComponent @submit.prevent="handleSubmit" v-if="step === 0">
+          <FormComponent v-if="step === 0" @submit.prevent="handleSubmit">
             <TextInputComponent
+              v-model="emailAddress"
               required
               label="E-mail"
               type="email"
               placeholder="E-mail"
               :value="emailAddress"
-              v-model="emailAddress"
               :icon="mdiEmailOutline"
               :disabled="posting"
               :error="emailAddressError"
@@ -209,8 +209,8 @@ const handleSubmit = async () => {
             <ButtonComponent
               kind="filled"
               color="primary"
-              @click.prevent="handleSubmit"
               :loading="posting"
+              @click.prevent="handleSubmit"
             >
               {{ $t('routes.profile.EmailFormPageVue.send-confirm') }}
               <template #iconAfter>

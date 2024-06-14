@@ -111,7 +111,7 @@ const { t } = useI18n();
                 $t('routes.profile.AuthPageVue.log-in')
               }}</template>
             </TitleText>
-            <BodyText strong size="small" v-if="type === 'registration'">
+            <BodyText v-if="type === 'registration'" strong size="small">
               {{ $t('routes.profile.AuthPageVue.opinion') }}
             </BodyText>
           </StackComponent>

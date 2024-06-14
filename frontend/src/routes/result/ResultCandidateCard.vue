@@ -148,7 +148,7 @@ const toggleClick = () => {
             ? candidate?.parties?.[0].name
             : candidate?.name
         }}</BodyText>
-        <BodyText size="medium" v-if="expert">
+        <BodyText v-if="expert" size="medium">
           postoje z verejných zdrojov
         </BodyText>
         <!--
