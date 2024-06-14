@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { mdiCloseCircleOutline, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 
@@ -28,7 +28,10 @@ import ResponsiveWrapper from '@/components/utilities/ResponsiveWrapper.vue';
 import StickyHeaderLayout from '@/components/layouts/StickyHeaderLayout.vue';
 
 import RecapQuestionCard from './RecapQuestionCard.vue';
+import InfovolbyRecapQuestionCard from './InfovolbyRecapQuestionCard.vue';
 import { getDistrictCode } from '@/common/utils';
+
+import { EmbedKey } from '@/components/utilities/embedding/EmbedKey'; // GH: Update
 
 import { useI18n } from 'vue-i18n';
 
@@ -37,6 +40,8 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const electionStore = useElectionStore();
+
+const currentEmbed = inject(EmbedKey); 
 
 const election = electionStore.election as DeprecatedElection;
 const electionName = election.name;
@@ -95,8 +100,8 @@ const isCardHidden = (index: number) => {
 <template>
   <BackgroundComponent :is-image="false">
     <StickyHeaderLayout>
-      <template #header>
-        <NavigationBar>
+      <template #header v-if="currentEmbed !== 'infovolby'">
+        <NavigationBar >
           <template #title>{{ breadcrumbs }}</template>
           <template #right>
             <EmbedWrapper>
@@ -155,7 +160,42 @@ const isCardHidden = (index: number) => {
           </SecondaryNavigationBar>
         </ResponsiveWrapper>
         <ResponsiveWrapper medium large extra-large huge>
-          <SecondaryNavigationBar>
+          <SecondaryNavigationBar v-if="currentEmbed === 'infovolby'" class="recap-header">
+            <template #before>
+              <!-- <IconButton @click="handlePreviousClick">
+                <IconComponent
+                  :icon="mdiArrowLeft"
+                  :title="$t('routes.recap.RecapPage.questions')"
+                />
+              </IconButton> -->
+              <ButtonComponent kind="link" @click="handlePreviousClick">
+                {{ t('routes.question.QuestionPage.previous-question-short') }}
+                <template #icon>
+                  <IconComponent :icon="mdiArrowLeft" />
+                </template>
+              </ButtonComponent>
+            </template>
+            <TitleText tag="h2" size="large" color='white'>{{
+              $t('routes.recap.RecapPage.recapitulation')
+            }}</TitleText>
+            <template #after>
+              <!-- <ButtonComponent
+                class="desktop"
+                kind="filled"
+                color="primary"
+                @click="handleShowResultsClick"
+              >
+                <template #icon>
+                  <IconComponent :icon="vkiLogoPercent" />
+                </template>
+                {{ $t('routes.recap.RecapPage.display-results') }}
+                <template #iconAfter>
+                  <IconComponent :icon="mdiArrowRight" />
+                </template>
+              </ButtonComponent> -->
+            </template>
+          </SecondaryNavigationBar>
+          <SecondaryNavigationBar v-else>
             <template #before>
               <IconButton @click="handlePreviousClick">
                 <IconComponent
@@ -187,7 +227,35 @@ const isCardHidden = (index: number) => {
         </ResponsiveWrapper>
       </template>
       <BottomBarWrapper>
-        <StackComponent class="main" spacing="small">
+        <!-- <StackComponent  class="main" spacing="small"> -->
+        <div class="bottom-bar-container" v-if="currentEmbed === 'infovolby'">
+          <div class="before"></div>
+          <div class="main">
+            <!-- <BodyText size="small">
+              {{ $t('routes.recap.RecapPage.hint-text') }}
+            </BodyText> -->
+            <StackComponent class="list" spacing="small">
+              <InfovolbyRecapQuestionCard
+                v-for="i in [...Array(electionStore.questionCount).keys()]"
+                :key="i"
+                :hidden="isCardHidden(i)"
+                :question="
+                  electionStore.calculator?.questions[i] as DeprecatedQuestion
+                "
+                :answer="electionStore.answers[i]"
+                :current-question="i + 1"
+                :question-count="electionStore.questionCount"
+                :star-click="() => handleStarClick(i)"
+                :yes-click="() => handleAnswerClick(i, UserAnswerEnum.yes)"
+                :no-click="() => handleAnswerClick(i, UserAnswerEnum.no)"
+                :skip-click="() => handleAnswerClick(i, UserAnswerEnum.skip)"
+              />
+            </StackComponent>
+          </div>
+            <div class="after"></div>
+          </div>
+        <!-- </StackComponent> -->
+        <StackComponent v-else class="main" spacing="small">
           <BodyText size="small">
             {{ $t('routes.recap.RecapPage.hint-text') }}
           </BodyText>
@@ -224,6 +292,45 @@ const isCardHidden = (index: number) => {
                   </template>
                 </ButtonComponent>
               </div>
+            </BottomBar>
+          </ResponsiveWrapper>
+          <ResponsiveWrapper v-if="currentEmbed === 'infovolby'" medium large extra-large>
+            <BottomBar>
+              <div class="bottom-bar-container">
+                <div class="before"></div>
+                <div class="main">
+                  <div class="wrapper">
+                    <ButtonComponent
+                      class="desktop"
+                      kind="outlined"
+                      color="white"
+                      @click="handleShowResultsClick"
+                    >
+                      <template #icon>
+                        <IconComponent :icon="vkiLogoPercent" />
+                      </template>
+                      {{ $t('routes.recap.RecapPage.display-results') }}
+                      <template #iconAfter>
+                        <IconComponent :icon="mdiArrowRight" />
+                      </template>
+                    </ButtonComponent>
+
+                  </div>
+                </div>
+                <div class="after"></div>
+              </div>
+              <!-- <div class="bottom-bar-grid">
+                <ButtonComponent
+                  kind="filled"
+                  color="primary"
+                  @click="handleShowResultsClick"
+                >
+                  Zobrazit výsledky
+                  <template #iconAfter>
+                    <IconComponent :icon="mdiArrowRight" />
+                  </template>
+                </ButtonComponent>
+              </div> -->
             </BottomBar>
           </ResponsiveWrapper>
         </template>

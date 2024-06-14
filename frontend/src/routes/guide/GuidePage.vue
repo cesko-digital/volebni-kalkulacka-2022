@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   mdiCloseCircleOutline,
@@ -45,11 +45,15 @@ import { getDistrictCode } from '@/common/utils';
 
 import { useI18n } from 'vue-i18n';
 
+import { EmbedKey } from '@/components/utilities/embedding/EmbedKey'; // GH: Update
+
 const { t, locale } = useI18n();
 
 const router = useRouter();
 const route = useRoute();
 const electionStore = useElectionStore();
+
+const currentEmbed = inject(EmbedKey); 
 
 const election = electionStore.election as DeprecatedElection;
 const electionName = election.name;
@@ -226,7 +230,7 @@ const handlePreviousClick = () => {
   <BackgroundComponent :is-image="false">
     <StickyHeaderLayout>
       <template #header>
-        <NavigationBar transparent>
+        <NavigationBar transparent v-if="currentEmbed !== 'infovolby'">
           <template #title>{{ breadcrumbs }}</template>
           <template #right>
             <EmbedWrapper>
@@ -266,7 +270,8 @@ const handlePreviousClick = () => {
               </ResponsiveWrapper>
             </EmbedWrapper>
           </template>
-        </NavigationBar>
+        </NavigationBar> 
+        <!-- GH: Update -->
       </template>
       <template #sticky-header>
         <ResponsiveWrapper extra-small small>
@@ -280,38 +285,44 @@ const handlePreviousClick = () => {
               </IconButton>
             </template>
             <template v-if="farthestCompletedStep >= currentStep" #after>
-              <IconButton @click="handleNextClick">
+              <!-- <IconButton @click="handleNextClick">
                 <IconComponent :icon="mdiArrowRight" :title="nextButtonTitle" />
-              </IconButton>
+              </IconButton> -->
             </template>
           </SecondaryNavigationBar>
         </ResponsiveWrapper>
       </template>
       <BottomBarWrapper>
         <StepWrapper centered>
+          <div v-if="currentEmbed" class="wrapper" style="padding-bottom: 24px;">
+            <LabelText class="text" color="white" style="font-size: 14px; margin-bottom: 16px;">
+              <!-- {{ $t('routes.guide.GuidePage.guide') }} -->
+              {{ currentStep }}&hairsp;/&hairsp;{{ stepsCount }}
+            </LabelText>
+          </div>
           <template #before>
-            <ResponsiveWrapper medium large extra-large huge>
+            <!-- <ResponsiveWrapper medium large extra-large huge>
               <IconButton v-if="currentStep > 1" @click="handlePreviousClick">
                 <IconComponent
                   :icon="mdiArrowLeft"
                   :title="previousButtonTitle"
                 />
               </IconButton>
-            </ResponsiveWrapper>
+            </ResponsiveWrapper> -->
           </template>
           <StackComponent v-if="currentStep === 1" spacing="small">
-            <HeadingComponent kind="title" size="medium">
+            <HeadingComponent :kind="currentEmbed === 'infovolby' ? 'title-embed' : 'title'" size="medium">
               {{ electionName }}
               <template #secondary
                 ><small>{{ districtNameWithCode }}</small></template
               >
             </HeadingComponent>
-            <BodyText size="medium">
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
               <MarkdownIt :markdown="text" />
             </BodyText>
           </StackComponent>
           <StackComponent v-if="currentStep === 2" spacing="small">
-            <BodyText size="medium">{{
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">{{
               $t('routes.guide.GuidePage.text-answer-button')
             }}</BodyText>
             <CardComponent
@@ -341,16 +352,16 @@ const handlePreviousClick = () => {
               </StackComponent>
             </CardComponent>
             <StackComponent spacing="extra-small">
-              <BodyText size="medium">
+              <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
                 {{ $t('routes.guide.GuidePage.text-method') }}
               </BodyText>
-              <BodyText size="medium">
+              <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
                 {{ $t('routes.guide.GuidePage.text-0') }}
               </BodyText>
             </StackComponent>
           </StackComponent>
           <StackComponent v-if="currentStep === 3" spacing="small">
-            <BodyText size="medium">
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
               {{ $t('routes.guide.GuidePage.text-important') }}
             </BodyText>
             <!-- TODO: remove inline styles -->
@@ -371,12 +382,12 @@ const handlePreviousClick = () => {
                 >
               </StackComponent>
             </CardComponent>
-            <BodyText size="medium">
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
               {{ $t('routes.guide.GuidePage.double-weight') }}
             </BodyText>
           </StackComponent>
           <StackComponent v-if="currentStep === 4" spacing="small">
-            <BodyText size="medium">
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
               {{ $t('routes.guide.GuidePage.skip-question') }}
             </BodyText>
             <CardComponent
@@ -391,24 +402,46 @@ const handlePreviousClick = () => {
                 >
               </StackComponent>
             </CardComponent>
-            <BodyText size="medium">
+            <BodyText size="medium" :color="currentEmbed === 'infovolby' ? 'white' : ''">
               {{ $t('routes.guide.GuidePage.not-included') }}
             </BodyText>
           </StackComponent>
           <template #after>
-            <ResponsiveWrapper medium large extra-large huge>
+            <!-- <ResponsiveWrapper medium large extra-large huge>
               <IconButton
                 v-if="farthestCompletedStep >= currentStep"
                 @click="handleNextClick"
               >
                 <IconComponent :icon="mdiArrowRight" :title="nextButtonTitle" />
               </IconButton>
-            </ResponsiveWrapper>
+            </ResponsiveWrapper> -->
           </template>
+          <BottomBar class="new-bottom-bar" transparent v-if="currentEmbed === 'infovolby'">
+            <ButtonComponent
+              class="next-button"
+              kind="outlined"
+              color="neutral"
+              @click="handleNextClick"
+            >
+              {{ nextButtonTitle }}
+            </ButtonComponent>
+            
+            <ButtonComponent
+              class="skip-button"
+              kind="link"
+              @click="goToQuestions"
+              color="white"
+            >
+              {{ $t('routes.guide.GuidePage.skip-guide') }}
+              <template #iconAfter>
+                <IconComponent :icon="mdiArrowRight" />
+              </template>
+            </ButtonComponent>
+          </BottomBar>
         </StepWrapper>
         <template #bottom-bar>
           <ResponsiveWrapper medium large extra-large huge>
-            <BottomBar class="bottom-bar" transparent>
+            <BottomBar class="bottom-bar" transparent v-if="currentEmbed !== 'infovolby'">
               <LabelText class="text">
                 {{ $t('routes.guide.GuidePage.guide') }}
                 {{ currentStep }}&hairsp;/&hairsp;{{ stepsCount }}
@@ -474,6 +507,38 @@ const handlePreviousClick = () => {
 </template>
 
 <style lang="scss" scoped>
+.new-bottom-bar{
+  // display: flex !important;
+  // justify-content: center !important;
+  // align-items: center !important;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: var(--spacing-small);
+  justify-content: center;
+  grid-template-areas: "next-button skip-button";
+
+  .next-button {
+    // grid-column: 1 / span 2;
+    // grid-row: 2;
+    grid-area: next-button !important;
+  }
+
+  .skip-button {
+    visibility: v-bind(skipButtonVisibility);
+    // grid-column: 1 / span 2;
+    // grid-row: 3;
+    justify-self: center;
+    grid-area: skip-button !important;
+  }
+
+  @media (max-width: 700px) {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+}
+
+
 .bottom-bar {
   display: grid;
   grid-template-columns: repeat(2, 8rem);

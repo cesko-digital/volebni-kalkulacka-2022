@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import type { RouteParams } from 'vue-router';
 import { mdiCloseCircleOutline, mdiArrowRight, mdiArrowLeft } from '@mdi/js';
@@ -23,10 +23,20 @@ import StepWrapper from '@/components/design-system/layout/StepWrapper.vue';
 
 import EmbedWrapper from '@/components/utilities/embedding/EmbedWrapper.vue';
 import QuestionBottomBar from './QuestionBottomBar.vue';
+import InfovolbyQuestionBottomBar from './InfovolbyQuestionBottomBar.vue';
 import QuestionCard from './QuestionCard.vue';
+import NewQuestionCard from './NewQuestionCard.vue';
 import BackgroundComponent from '../../components/design-system/style/BackgroundComponent.vue';
 import StatusBarComponent from '@/components/design-system/other/StatusBarComponent.vue';
 import { getDistrictCode } from '@/common/utils';
+
+import{
+  vkiStarOutlined,
+  vkiStarFilled,
+} from '@/components/design-system/icons';
+
+
+import { EmbedKey } from '@/components/utilities/embedding/EmbedKey'; // GH: Update
 
 import { useI18n } from 'vue-i18n';
 
@@ -35,6 +45,8 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const electionStore = useElectionStore();
+
+const currentEmbed = inject(EmbedKey);
 
 onBeforeRouteUpdate(questionGuard);
 
@@ -170,7 +182,7 @@ const handleAnswerClick = (answer: UserAnswerEnum) => {
 <template>
   <StickyHeaderLayout>
     <template #header>
-      <NavigationBar transparent>
+      <NavigationBar transparent v-if="currentEmbed !== 'infovolby'">
         <template #title>{{ breadcrumbs }}</template>
         <template #right>
           <EmbedWrapper>
@@ -236,6 +248,55 @@ const handleAnswerClick = (answer: UserAnswerEnum) => {
         </SecondaryNavigationBar>
       </ResponsiveWrapper>
     </template>
+
+    <ResponsiveWrapper v-if="currentEmbed === 'infovolby'" medium large extra-large class="infovolby-header">
+      <SecondaryNavigationBar>
+        <template #before>
+          <ButtonComponent kind="link" @click="handlePreviousClick">
+            {{ t('routes.question.QuestionPage.previous-question-short') }}
+            <template #icon>
+              <IconComponent :icon="mdiArrowLeft" />
+            </template>
+          </ButtonComponent>
+        </template>
+        <div class="content-wrapper">
+          <div class="col-1">
+            <BodyText size="small" class="questionCounter">
+              {{ currentQuestionNr + 1 }}/{{ questionCount }}
+            </BodyText>
+            <BodyText size="small" class="questionName">{{ electionStore.calculator?.questions[currentQuestionNr].name }}</BodyText>
+            <TagComponent class="questionTag tag tag--neutral" v-for="tag in electionStore.calculator?.questions[currentQuestionNr].tags" :key="tag">
+              {{ tag }}
+            </TagComponent>
+          </div>
+          <div class="col-2">
+            <StackComponent
+              horizontal
+              centered
+              class="important"
+            >
+              <!-- @click="starClick" -->
+              <IconButton>
+                <IconComponent
+                  @click="handleStarClick"
+                  :icon="electionStore.answers[currentQuestionNr].flag ? vkiStarFilled : vkiStarOutlined"
+                  :color="electionStore.answers[currentQuestionNr].flag ? 'rgba(var(--palette-yellow))' : 'rgba(var(--palette-neutral-100))'"
+                  size="large"
+                  title="Pro mě důležité"
+                />
+              </IconButton>
+              <!-- <BodyText class="star-text" size="medium">{{
+                $t('routes.question.QuestionBottomBar.important-for-me')
+              }}</BodyText> -->
+            </StackComponent>
+          </div>
+        </div>
+        <template #after>
+          
+        </template>
+      </SecondaryNavigationBar>
+    </ResponsiveWrapper>
+
     <BottomBarWrapper>
       <BackgroundComponent>
         <ResponsiveWrapper extra-small>
@@ -251,7 +312,77 @@ const handleAnswerClick = (answer: UserAnswerEnum) => {
             />
           </StepWrapper>
         </ResponsiveWrapper>
-        <ResponsiveWrapper small medium large extra-large huge>
+        <ResponsiveWrapper medium large extra-large huge>
+        </ResponsiveWrapper>
+        <ResponsiveWrapper
+          v-if="currentEmbed === 'infovolby'"
+          small
+          medium
+          large
+          extra-large
+          huge
+        >
+          <StepWrapper centered>
+            <template #before>
+              <!-- <ResponsiveWrapper medium large extra-large huge>
+                <ButtonComponent kind="link" @click="handlePreviousClick" style="position: absolute; left: 2%; top: 12%;">
+                  <ResponsiveWrapper large>
+                    {{ previousButtonTitle.short }}
+                  </ResponsiveWrapper>
+                  <ResponsiveWrapper extra-large huge>
+                    {{ previousButtonTitle.short }}
+                  </ResponsiveWrapper>
+                  <template #icon>
+                    <IconComponent
+                      :icon="mdiArrowLeft"
+                      :title="previousButtonTitle.short"
+                    />
+                  </template>
+                </ButtonComponent>
+              </ResponsiveWrapper> -->
+            </template>
+            <NewQuestionCard
+              :current-question="currentQuestionNr + 1"
+              :question-count="electionStore.questionCount"
+              :question="
+                electionStore.calculator?.questions[
+                  currentQuestionNr
+                ] as DeprecatedQuestion
+              "
+            />
+            <InfovolbyQuestionBottomBar
+              :answer="electionStore.answers[currentQuestionNr]"
+              :star-click="handleStarClick"
+              :yes-click="() => handleAnswerClick(UserAnswerEnum.yes)"
+              :no-click="() => handleAnswerClick(UserAnswerEnum.no)"
+              :skip-click="() => handleAnswerClick(UserAnswerEnum.skip)"
+            />
+            <StatusBarComponent
+              :total-question="electionStore.questionCount"
+              :answers="electionStore.answers"
+              :current-question="currentQuestionNr"
+            />
+            <!-- <template #after>
+              <ResponsiveWrapper medium large extra-large huge>
+                <ButtonComponent kind="link" @click="handleNextClick">
+                  <ResponsiveWrapper large>
+                    {{ nextButtonTitle.short }}
+                  </ResponsiveWrapper>
+                  <ResponsiveWrapper extra-large huge>
+                    {{ nextButtonTitle.long }}
+                  </ResponsiveWrapper>
+                  <template #iconAfter>
+                    <IconComponent
+                      :icon="mdiArrowRight"
+                      :title="nextButtonTitle.long"
+                    />
+                  </template>
+                </ButtonComponent>
+              </ResponsiveWrapper>
+            </template> -->
+          </StepWrapper>
+        </ResponsiveWrapper>
+        <ResponsiveWrapper v-else small medium large extra-large huge>
           <StepWrapper centered>
             <template #before>
               <ResponsiveWrapper medium large extra-large huge>
@@ -301,7 +432,7 @@ const handleAnswerClick = (answer: UserAnswerEnum) => {
           </StepWrapper>
         </ResponsiveWrapper>
       </BackgroundComponent>
-      <template #bottom-bar>
+      <template #bottom-bar v-if="currentEmbed !== 'infovolby'">
         <StatusBarComponent
           :total-question="electionStore.questionCount"
           :answers="electionStore.answers"

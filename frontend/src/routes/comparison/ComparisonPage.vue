@@ -27,13 +27,18 @@ import StickyHeaderLayout from '@/components/layouts/StickyHeaderLayout.vue';
 import ComparisonGrid from './ComparisonGrid.vue';
 import ContainerComponent from '../../components/design-system/containers/ContainerComponent.vue';
 
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
+import { EmbedKey } from '@/components/utilities/embedding/EmbedKey';
 import QuestionCandidateFilter from '@/components/QuestionCandidateFilter.vue';
 import QuestionTagFilter from '@/components/QuestionTagFilter.vue';
+
+
 
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
+
+const currentEmbed = inject(EmbedKey);
 
 const router = useRouter();
 const route = useRoute();
@@ -78,7 +83,7 @@ const candidateAnswers = electionStore.calculator
   <BackgroundComponent :is-image="false">
     <StickyHeaderLayout>
       <template #header>
-        <NavigationBar>
+        <NavigationBar v-if="currentEmbed !== 'infovolby'">
           <template #title>{{ breadcrumbs }}</template>
           <template #right>
             <EmbedWrapper>
@@ -167,11 +172,12 @@ const candidateAnswers = electionStore.calculator
               <IconButton @click="handlePreviousClick">
                 <IconComponent
                   :icon="mdiArrowLeft"
+                  :color="currentEmbed === 'infovolby' ? 'white': ''"
                   :title="$t('routes.comparison.ComparisonPage.my-match')"
                 />
               </IconButton>
             </template>
-            <TitleText tag="h2" size="large">{{
+            <TitleText tag="h2" size="large" :color="currentEmbed === 'infovolby' ? 'white': ''">{{
               $t('routes.comparison.ComparisonPage.comparison')
             }}</TitleText>
             <template #after>
