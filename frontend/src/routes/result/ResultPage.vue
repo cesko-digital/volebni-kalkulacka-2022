@@ -531,7 +531,7 @@ onBeforeUnmount(removeExternalScript);
             <ResultCategory
               :result="resultsGeneral"
               category="general"
-              :max-visible-candidates="5"
+              :max-visible-candidates="10"
             />
 
 
